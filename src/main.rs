@@ -21,7 +21,7 @@ fn main() -> anyhow::Result<()> {
                 opts.number,
                 opts.symbol,
             )?;
-            println!("GenPass: {}", password);
+            println!("{}", password);
         }
     }
     Ok(())
