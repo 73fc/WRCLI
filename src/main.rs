@@ -1,6 +1,9 @@
 use clap::Parser;
 //wrcli   csv -i input.csv -o output.json -- header -d '.'
-use wrcli::{process_csv, process_genpass, Opts, SubCommand};
+use wrcli::{
+    base64::Base64SubCommand, process_csv, process_decode, process_encode, process_genpass, Opts,
+    SubCommand,
+};
 
 fn main() -> anyhow::Result<()> {
     let opts = Opts::parse();
@@ -23,6 +26,14 @@ fn main() -> anyhow::Result<()> {
             )?;
             println!("{}", password);
         }
+        SubCommand::Base64(subcommd) => match subcommd {
+            Base64SubCommand::Encode(opts) => {
+                println!("{}", process_encode(&opts.input, opts.format)?);
+            }
+            Base64SubCommand::Decode(opts) => {
+                println!("{}", process_decode(&opts.input, opts.format)?);
+            }
+        },
     }
     Ok(())
 }
