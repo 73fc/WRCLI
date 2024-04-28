@@ -1,8 +1,10 @@
+use std::path::{Path, PathBuf};
+
 use clap::Parser;
 pub mod base64;
 pub mod csv;
 pub mod genpass;
-
+pub mod text;
 #[derive(Debug, Parser)]
 #[command(name = "wrcli", version, author, about, long_about = None)]
 pub struct Opts {
@@ -17,13 +19,24 @@ pub enum SubCommand {
     GenPass(genpass::GenPassOpts),
     #[command(subcommand)]
     Base64(base64::Base64SubCommand),
+    #[command(subcommand)]
+    Text(text::TextSubCommand),
 }
 
-pub fn verify_input_file(file_path: &str) -> Result<String, &'static str> {
+pub fn verify_file(file_path: &str) -> Result<String, &'static str> {
     if file_path == "-" || std::path::Path::new(file_path).exists() {
         Ok(file_path.into())
     } else {
         Err("File doesn't exist")
+    }
+}
+
+pub fn verify_path(file_path: &str) -> Result<PathBuf, &'static str> {
+    let p = Path::new(file_path);
+    if p.exists() && p.is_dir() {
+        Ok(file_path.into())
+    } else {
+        Err("Path doesn't exist")
     }
 }
 
@@ -32,9 +45,9 @@ mod tests {
     use super::*;
     #[test]
     fn test_verify_input_file() {
-        assert_eq!(verify_input_file("-"), Ok("-".into()));
-        assert_eq!(verify_input_file("*"), Err("File doesn't exist"));
-        assert_eq!(verify_input_file("Cargo.toml"), Ok("Cargo.toml".into()));
-        assert_eq!(verify_input_file("no-exist"), Err("File doesn't exist"));
+        assert_eq!(verify_file("-"), Ok("-".into()));
+        assert_eq!(verify_file("*"), Err("File doesn't exist"));
+        assert_eq!(verify_file("Cargo.toml"), Ok("Cargo.toml".into()));
+        assert_eq!(verify_file("no-exist"), Err("File doesn't exist"));
     }
 }
