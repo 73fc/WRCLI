@@ -1,6 +1,5 @@
-use std::fs;
-
 use clap::Parser;
+use std::fs;
 //wrcli   csv -i input.csv -o output.json -- header -d '.'
 use wrcli::{
     base64::Base64SubCommand, http::HttpSubCommand, process_csv, process_decode, process_encode,

@@ -1,3 +1,8 @@
-### Test index page
+### Test static file
 
 GET http://localhost:8080/Cargo.toml
+
+### Test static file with tower
+
+GET http://localhost:8080/tower/Cargo.toml
+Range: bytes=100-800
