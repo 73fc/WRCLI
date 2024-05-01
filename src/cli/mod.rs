@@ -4,6 +4,7 @@ use clap::Parser;
 pub mod base64;
 pub mod csv;
 pub mod genpass;
+pub mod http;
 pub mod text;
 #[derive(Debug, Parser)]
 #[command(name = "wrcli", version, author, about, long_about = None)]
@@ -21,6 +22,8 @@ pub enum SubCommand {
     Base64(base64::Base64SubCommand),
     #[command(subcommand)]
     Text(text::TextSubCommand),
+    #[command(subcommand)]
+    Http(http::HttpSubCommand),
 }
 
 pub fn verify_file(file_path: &str) -> Result<String, &'static str> {

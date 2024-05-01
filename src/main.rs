@@ -3,11 +3,12 @@ use std::fs;
 use clap::Parser;
 //wrcli   csv -i input.csv -o output.json -- header -d '.'
 use wrcli::{
-    base64::Base64SubCommand, process_csv, process_decode, process_encode, process_generate,
-    process_genpass, process_sign, process_verify, text::TextSubCommand, Opts, SubCommand,
+    base64::Base64SubCommand, http::HttpSubCommand, process_csv, process_decode, process_encode,
+    process_generate, process_genpass, process_http_serve, process_sign, process_verify,
+    text::TextSubCommand, Opts, SubCommand,
 };
-
-fn main() -> anyhow::Result<()> {
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
     let opts = Opts::parse();
     match opts.cmd {
         SubCommand::Csv(opts) => {
@@ -68,6 +69,12 @@ fn main() -> anyhow::Result<()> {
                         println! {"public key is generated on the file {:?}", file_name};
                     }
                 }
+            }
+        },
+        SubCommand::Http(cmd) => match cmd {
+            HttpSubCommand::Serve(opts) => {
+                println!("serving at http://0.0.0.0:{}//{:?}", opts.port, opts.dir);
+                process_http_serve(opts.dir, opts.port).await?;
             }
         },
     }
