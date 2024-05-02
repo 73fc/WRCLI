@@ -1,5 +1,10 @@
+use crate::process_generate;
+use crate::process_sign;
+use crate::process_verify;
+use crate::CmdExector;
+
 use super::{verify_file, verify_path};
-use std::{path::PathBuf, str::FromStr};
+use std::{fs, path::PathBuf, str::FromStr};
 
 use anyhow::Ok;
 use clap::Parser;
@@ -81,5 +86,56 @@ impl From<TextSignFormat> for &'static str {
 impl std::fmt::Display for TextSignFormat {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", Into::<&'static str>::into(*self))
+    }
+}
+
+impl CmdExector for TextSubCommand {
+    async fn execute(self) -> anyhow::Result<()> {
+        match self {
+            TextSubCommand::Sign(opts) => opts.execute().await,
+            TextSubCommand::Verify(opts) => opts.execute().await,
+            TextSubCommand::Generate(opts) => opts.execute().await,
+        }
+    }
+}
+
+impl CmdExector for TextSignOpts {
+    async fn execute(self) -> anyhow::Result<()> {
+        let signed = process_sign(&self.input, &self.key, self.format)?;
+        println!("{}", signed);
+        Ok(())
+    }
+}
+
+impl CmdExector for TextVerifyOpts {
+    async fn execute(self) -> anyhow::Result<()> {
+        let ret = process_verify(&self.input, &self.key, self.format, &self.sign)?;
+        println!("{:?}", ret);
+        Ok(())
+    }
+}
+
+impl CmdExector for TextGnenrateOpts {
+    async fn execute(self) -> anyhow::Result<()> {
+        let ret = process_generate(self.format)?;
+        match self.format {
+            TextSignFormat::Blake3 => {
+                let name = self.output.join("blake3.k");
+                let file_name = name.clone();
+                let _ = fs::write(name, &ret[0]);
+                println! {"key is generated on the file {:?}", file_name};
+            }
+            TextSignFormat::Ed25519 => {
+                let name = self.output.join("Ed25519.sk");
+                let file_name = name.clone();
+                let _ = fs::write(name, &ret[0]);
+                println! {"signing key is generated on the file {:?}", file_name};
+                let name = self.output.join("Ed25519.pk");
+                let file_name = name.clone();
+                let _ = fs::write(name, &ret[1]);
+                println! {"public key is generated on the file {:?}", file_name};
+            }
+        }
+        Ok(())
     }
 }

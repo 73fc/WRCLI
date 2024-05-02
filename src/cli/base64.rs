@@ -1,3 +1,6 @@
+use crate::process_decode;
+use crate::process_encode;
+use crate::CmdExector;
 use std::str::FromStr;
 
 use anyhow::Ok;
@@ -53,5 +56,28 @@ impl From<Base64Format> for &'static str {
             Base64Format::Standard => "standard",
             Base64Format::UrlSafe => "urlsafe",
         }
+    }
+}
+
+impl CmdExector for Base64SubCommand {
+    async fn execute(self) -> anyhow::Result<()> {
+        match self {
+            Base64SubCommand::Encode(opts) => opts.execute().await,
+            Base64SubCommand::Decode(opts) => opts.execute().await,
+        }
+    }
+}
+
+impl CmdExector for Base64Encode {
+    async fn execute(self) -> anyhow::Result<()> {
+        println!("{}", process_encode(&self.input, self.format)?);
+        Ok(())
+    }
+}
+
+impl CmdExector for Base64Decode {
+    async fn execute(self) -> anyhow::Result<()> {
+        println!("{}", process_decode(&self.input, self.format)?);
+        Ok(())
     }
 }
