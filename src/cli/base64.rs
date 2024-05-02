@@ -5,8 +5,10 @@ use std::str::FromStr;
 
 use anyhow::Ok;
 use clap::Parser;
+use enum_dispatch::enum_dispatch;
 
 #[derive(Debug, Parser)]
+#[enum_dispatch(CmdExector)]
 pub enum Base64SubCommand {
     #[command(name = "encode", about = "encode contexts to base64")]
     Encode(Base64Encode),
@@ -55,15 +57,6 @@ impl From<Base64Format> for &'static str {
         match value {
             Base64Format::Standard => "standard",
             Base64Format::UrlSafe => "urlsafe",
-        }
-    }
-}
-
-impl CmdExector for Base64SubCommand {
-    async fn execute(self) -> anyhow::Result<()> {
-        match self {
-            Base64SubCommand::Encode(opts) => opts.execute().await,
-            Base64SubCommand::Decode(opts) => opts.execute().await,
         }
     }
 }
